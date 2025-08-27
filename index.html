@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text to Speech Online | Free Voice Generator & Converter</title>
+    <meta name="description" content="Convert your text to natural-sounding speech instantly with our free online Text to Speech tool. Generate high-quality audio from any written content, ideal for accessibility, learning, content creation, and more. Transform articles, e-books, and notes into engaging voices with ease.">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for a nice look -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #FF6B6B, #F6F4FF, #6B8AFF, #8D6BFF);
+            background-size: 400% 400%;
+            animation: gradient-animation 15s ease infinite;
+        }
+
+        @keyframes gradient-animation {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        #app-container {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+        }
+        
+        button {
+            transition: all 0.3s ease;
+            transform: translateY(0);
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        
+        button:disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+            transform: translateY(0);
+            box-shadow: none;
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen p-4 sm:p-8 text-gray-800">
+
+    <div class="text-center mb-8">
+        <h1 class="text-4xl sm:text-5xl font-extrabold text-white drop-shadow-lg mb-2">Text to Speech Online Free</h1>
+        <p class="text-lg text-white font-medium drop-shadow-md max-w-xl mx-auto">Convert your text to natural-sounding speech instantly with our free online Text to Speech tool. Generate high-quality audio from any written content, ideal for accessibility, learning, content creation, and more. Transform articles, e-books, and notes into engaging voices with ease.</p>
+    </div>
+
+    <div id="app-container" class="w-full max-w-2xl p-6 sm:p-8 rounded-3xl shadow-2xl flex flex-col items-center space-y-6">
+        <!-- Text Input Area -->
+        <textarea id="text-input" rows="8" placeholder="Type or paste your text here..." class="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 resize-none font-medium text-gray-700"></textarea>
+
+        <!-- Control Buttons -->
+        <div class="flex flex-wrap justify-center gap-4 w-full">
+            <button id="generate-btn" class="bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-bold py-3 px-6 rounded-full shadow-lg">
+                Generate Voice
+            </button>
+            <button id="play-btn" class="bg-gradient-to-r from-green-400 to-teal-500 text-white font-bold py-3 px-6 rounded-full shadow-lg" disabled>
+                Play
+            </button>
+            <button id="download-btn" class="bg-gradient-to-r from-yellow-400 to-orange-500 text-white font-bold py-3 px-6 rounded-full shadow-lg" disabled>
+                Download
+            </button>
+        </div>
+        
+        <!-- Message Box -->
+        <div id="message-box" class="w-full text-center p-3 bg-blue-100 border border-blue-400 text-blue-700 rounded-lg font-medium hidden">
+            <!-- Messages will be displayed here -->
+        </div>
+
+        <!-- Audio Player -->
+        <audio id="audio-player" class="w-full hidden"></audio>
+
+    </div>
+
+    <!-- Native Banner Ad -->
+    <div class="mt-8 w-full max-w-2xl">
+        <script async="async" data-cfasync="false" src="//pl27005060.profitableratecpm.com/c809c87dc250c2c46329a7547968100b/invoke.js"></script>
+        <div id="container-c809c87dc250c2c46329a7547968100b"></div>
+    </div>
+
+    <!-- Credit / Copyright -->
+    <footer class="mt-8 text-white text-sm font-medium drop-shadow-md">
+        A Product by <a href="https://plaxora.free.nf" target="_blank" rel="noopener noreferrer" class="underline hover:text-blue-200">Plaxora</a>
+    </footer>
+    
+    <script>
+        // Selecting DOM elements
+        const textInput = document.getElementById('text-input');
+        const generateBtn = document.getElementById('generate-btn');
+        const playBtn = document.getElementById('play-btn');
+        const downloadBtn = document.getElementById('download-btn');
+        const messageBox = document.getElementById('message-box');
+        const audioPlayer = document.getElementById('audio-player');
+        
+        let audioBlob = null;
+        let isGenerating = false;
+        
+        // API Key (This should be left empty as Canvas will provide it)
+        const apiKey = "";
+        
+        // Function to display messages
+        function showMessage(msg, type = 'info') {
+            messageBox.textContent = msg;
+            messageBox.classList.remove('hidden');
+            messageBox.className = ''; // Remove all classes
+            messageBox.classList.add('w-full', 'text-center', 'p-3', 'rounded-lg', 'font-medium');
+            if (type === 'error') {
+                messageBox.classList.add('bg-red-100', 'border-red-400', 'text-red-700');
+            } else if (type === 'success') {
+                messageBox.classList.add('bg-green-100', 'border-green-400', 'text-green-700');
+            } else {
+                messageBox.classList.add('bg-blue-100', 'border-blue-400', 'text-blue-700');
+            }
+        }
+        
+        // Function to convert Base64 to ArrayBuffer
+        function base64ToArrayBuffer(base64) {
+            const binaryString = window.atob(base64);
+            const len = binaryString.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            return bytes.buffer;
+        }
+
+        // Function to convert PCM to WAV file
+        function pcmToWav(pcmData, sampleRate) {
+            const pcm16 = new Int16Array(pcmData);
+            const wavData = new ArrayBuffer(44 + pcm16.length * 2);
+            const view = new DataView(wavData);
+
+            // WAV file header
+            // RIFF chunk descriptor
+            writeString(view, 0, 'RIFF');
+            view.setUint32(4, 36 + pcm16.length * 2, true);
+            writeString(view, 8, 'WAVE');
+            // FMT chunk
+            writeString(view, 12, 'fmt ');
+            view.setUint32(16, 16, true);
+            view.setUint16(20, 1, true); // PCM format
+            view.setUint16(22, 1, true); // 1 channel
+            view.setUint32(24, sampleRate, true);
+            view.setUint32(28, sampleRate * 2, true);
+            view.setUint16(32, 2, true); // block align
+            view.setUint16(34, 16, true); // 16 bits per sample
+            // DATA chunk
+            writeString(view, 36, 'data');
+            view.setUint32(40, pcm16.length * 2, true);
+
+            // Write PCM data
+            for (let i = 0; i < pcm16.length; i++) {
+                view.setInt16(44 + i * 2, pcm16[i], true);
+            }
+
+            return new Blob([view], { type: 'audio/wav' });
+
+            function writeString(view, offset, string) {
+                for (let i = 0; i < string.length; i++) {
+                    view.setUint8(offset + i, string.charCodeAt(i));
+                }
+            }
+        }
+        
+        // Function to generate speech from text
+        async function generateSpeech() {
+            const text = textInput.value.trim();
+            if (text.length === 0) {
+                showMessage("Please enter or paste some text.", 'error');
+                return;
+            }
+
+            isGenerating = true;
+            generateBtn.disabled = true;
+            playBtn.disabled = true;
+            downloadBtn.disabled = true;
+            showMessage("Generating voice... Please wait.", 'info');
+
+            const payload = {
+                contents: [{
+                    parts: [{ text: text }]
+                }],
+                generationConfig: {
+                    responseModalities: ["AUDIO"],
+                    speechConfig: {
+                        voiceConfig: {
+                            prebuiltVoiceConfig: { voiceName: "Fenrir" }
+                        }
+                    }
+                },
+                model: "gemini-2.5-flash-preview-tts"
+            };
+
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
+            
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+                const part = result?.candidates?.[0]?.content?.parts?.[0];
+                const audioData = part?.inlineData?.data;
+                const mimeType = part?.inlineData?.mimeType;
+
+                if (audioData && mimeType && mimeType.startsWith("audio/")) {
+                    const sampleRateMatch = mimeType.match(/rate=(\d+)/);
+                    if (!sampleRateMatch) {
+                        throw new Error("Sample rate not found in mimeType.");
+                    }
+                    const sampleRate = parseInt(sampleRateMatch[1], 10);
+                    
+                    const pcmData = base64ToArrayBuffer(audioData);
+                    audioBlob = pcmToWav(pcmData, sampleRate);
+                    const audioUrl = URL.createObjectURL(audioBlob);
+                    
+                    audioPlayer.src = audioUrl;
+                    audioPlayer.load();
+                    
+                    playBtn.disabled = false;
+                    downloadBtn.disabled = false;
+                    showMessage("Voice generated successfully!", 'success');
+                } else {
+                    throw new Error("Invalid audio data received.");
+                }
+
+            } catch (err) {
+                console.error("Error during API call:", err);
+                showMessage("Sorry, unable to generate voice. Please try again.", 'error');
+            } finally {
+                isGenerating = false;
+                generateBtn.disabled = false;
+            }
+        }
+        
+        // Add event listeners to buttons
+        generateBtn.addEventListener('click', generateSpeech);
+        
+        playBtn.addEventListener('click', () => {
+            if (audioPlayer.src) {
+                audioPlayer.play();
+            }
+        });
+        
+        downloadBtn.addEventListener('click', () => {
+            if (audioBlob) {
+                const url = URL.createObjectURL(audioBlob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'generated_voice.wav';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
+        });
+
+    </script>
+</body>
+</html>
