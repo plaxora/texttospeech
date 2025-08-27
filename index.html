@@ -112,7 +112,7 @@
         let isGenerating = false;
         
         // API Key - It will be automatically provided by the Canvas environment.
-        const apiKey = "AIzaSyB6MHYEw1SbF8QcPeykLfOitjBNywUw6nk";
+        const apiKey = "";
         
         // Function to display messages
         function showMessage(msg, type = 'info') {
@@ -197,7 +197,7 @@
                     parts: [{ text: text }]
                 }],
                 generationConfig: {
-                    responseModalities: ["AUDIO"],
+                    responseModality: 'AUDIO',
                     speechConfig: {
                         voiceConfig: {
                             prebuiltVoiceConfig: { voiceName: "Fenrir" }
@@ -207,7 +207,7 @@
                 model: "gemini-2.5-flash-preview-tts"
             };
 
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent`;
             
             console.log("Making API call to:", apiUrl);
             console.log("Payload:", payload);
@@ -215,7 +215,7 @@
             try {
                 const response = await fetch(apiUrl, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'Content-Type': 'application/json', 'X-Goog-Api-Key': apiKey },
                     body: JSON.stringify(payload)
                 });
                 
@@ -224,6 +224,8 @@
                 if (!response.ok) {
                     const errorBody = await response.json();
                     console.error("API Error Response:", errorBody);
+                    // Log the full API URL for debugging.
+                    console.error(`Full API URL: ${apiUrl}`);
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
 
