@@ -111,8 +111,8 @@
         let audioBlob = null;
         let isGenerating = false;
         
-        // API Key (This should be left empty as Canvas will provide it)
-        const apiKey = "AIzaSyB6MHYEw1SbF8QcPeykLfOitjBNywUw6nk";
+        // API Key - It will be automatically provided by the Canvas environment.
+        const apiKey = "";
         
         // Function to display messages
         function showMessage(msg, type = 'info') {
@@ -209,18 +209,27 @@
 
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
             
+            console.log("Making API call to:", apiUrl);
+            console.log("Payload:", payload);
+
             try {
                 const response = await fetch(apiUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
+                
+                console.log("API Response Status:", response.status, response.statusText);
 
                 if (!response.ok) {
+                    const errorBody = await response.json();
+                    console.error("API Error Response:", errorBody);
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
 
                 const result = await response.json();
+                console.log("API Response Success:", result);
+
                 const part = result?.candidates?.[0]?.content?.parts?.[0];
                 const audioData = part?.inlineData?.data;
                 const mimeType = part?.inlineData?.mimeType;
